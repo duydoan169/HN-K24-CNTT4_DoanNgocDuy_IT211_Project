@@ -1,7 +1,6 @@
 package org.example.project.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.project.exception.AccessDeniedException;
 import org.example.project.exception.AppointmentNotFoundException;
 import org.example.project.exception.ConflictException;
 import org.example.project.exception.UserNotFoundException;
@@ -15,6 +14,7 @@ import org.example.project.repository.AppointmentRepository;
 import org.example.project.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.temporal.ChronoUnit;
@@ -88,7 +88,7 @@ public class AppointmentService {
                 .orElseThrow(() -> new AppointmentNotFoundException(appointmentId));
 
         if (!appointment.getDoctor().getId().equals(doctorId)) {
-            throw new AccessDeniedException();
+            throw new AccessDeniedException("Không có quyền thực hiện thao tác này");
         }
 
         if (appointment.getStatus() != AppointmentStatus.PENDING) {
@@ -104,7 +104,7 @@ public class AppointmentService {
                 .orElseThrow(() -> new AppointmentNotFoundException(appointmentId));
 
         if (!appointment.getDoctor().getId().equals(doctorId)) {
-            throw new AccessDeniedException();
+            throw new AccessDeniedException("Không có quyền thực hiện thao tác này");
         }
 
         if (appointment.getStatus() != AppointmentStatus.PENDING) {
@@ -123,7 +123,7 @@ public class AppointmentService {
         boolean isDoctor = appointment.getDoctor().getId().equals(requesterId);
 
         if (!isPatient && !isDoctor) {
-            throw new AccessDeniedException();
+            throw new AccessDeniedException("Không có quyền thực hiện thao tác này");
         }
 
         if (appointment.getStatus() != AppointmentStatus.PENDING &&

@@ -1,7 +1,6 @@
 package org.example.project.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.project.exception.AccessDeniedException;
 import org.example.project.exception.AppointmentNotFoundException;
 import org.example.project.exception.ConflictException;
 import org.example.project.model.dto.response.MedicalRecordResponse;
@@ -12,6 +11,7 @@ import org.example.project.repository.AppointmentRepository;
 import org.example.project.repository.MedicalRecordRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,7 +28,7 @@ public class MedicalRecordService {
                 .orElseThrow(() -> new AppointmentNotFoundException(appointmentId));
 
         if (!appointment.getDoctor().getId().equals(doctorId)) {
-            throw new AccessDeniedException();
+            throw new AccessDeniedException("Không có quyền thực hiện thao tác này");
         }
 
         if (appointment.getStatus() != AppointmentStatus.APPROVED) {
@@ -43,6 +43,9 @@ public class MedicalRecordService {
                 .diagnosis(diagnosis)
                 .build();
 
+        appointment.setStatus(AppointmentStatus.COMPLETED);
+        appointmentRepository.save(appointment);
+
         return toResponse(medicalRecordRepository.save(record));
     }
 
@@ -54,7 +57,7 @@ public class MedicalRecordService {
         boolean isDoctor = appointment.getDoctor().getId().equals(requesterId);
 
         if (!isPatient && !isDoctor) {
-            throw new AccessDeniedException();
+            throw new AccessDeniedException("Không có quyền thực hiện thao tác này");
         }
 
         return medicalRecordRepository.findByAppointmentId(appointmentId, PageRequest.of(page, size))

@@ -17,6 +17,7 @@ import org.example.project.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -37,13 +38,11 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(AuthRequest request) {
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
 
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new UserNotFoundException(request.getUsername()));
-
+        User user = (User) authentication.getPrincipal();
         refreshTokenRepository.deleteByUser(user);
 
         String accessToken = jwtUtil.generateAccessToken(user);
