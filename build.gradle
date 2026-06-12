@@ -45,6 +45,8 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
     // Source: https://mvnrepository.com/artifact/com.cloudinary/cloudinary-http44
     implementation("com.cloudinary:cloudinary-http44:1.39.0")
+    // Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-aop
+    implementation("org.springframework.boot:spring-boot-starter-aop:4.0.0-M2")
 }
 
 tasks.named('test') {
