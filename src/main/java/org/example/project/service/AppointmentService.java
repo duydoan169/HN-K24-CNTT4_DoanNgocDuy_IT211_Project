@@ -1,5 +1,6 @@
 package org.example.project.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.project.exception.AppointmentNotFoundException;
 import org.example.project.exception.ConflictException;
@@ -26,6 +27,7 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public AppointmentResponse bookAppointment(Long patientId, AppointmentRequest request) {
         User patient = userRepository.findById(patientId)
                 .orElseThrow(() -> new UserNotFoundException(patientId));
@@ -83,6 +85,7 @@ public class AppointmentService {
                 .map(this::toResponse);
     }
 
+    @Transactional
     public AppointmentResponse approveAppointment(Long appointmentId, Long doctorId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new AppointmentNotFoundException(appointmentId));
@@ -99,6 +102,7 @@ public class AppointmentService {
         return toResponse(appointmentRepository.save(appointment));
     }
 
+    @Transactional
     public AppointmentResponse rejectAppointment(Long appointmentId, Long doctorId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new AppointmentNotFoundException(appointmentId));
@@ -115,6 +119,7 @@ public class AppointmentService {
         return toResponse(appointmentRepository.save(appointment));
     }
 
+    @Transactional
     public AppointmentResponse cancelAppointment(Long appointmentId, Long requesterId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new AppointmentNotFoundException(appointmentId));
