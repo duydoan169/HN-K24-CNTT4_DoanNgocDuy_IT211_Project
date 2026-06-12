@@ -14,7 +14,7 @@ public class RegisterRequest {
     private String username;
 
     @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, message = "Mật khẩu phải có độ dài lớn hơn 6 ký tự")
+    @Size(min = 6, message = "Mật khẩu phải có độ dài ít nhất 6 ký tự")
     private String password;
 
     private Role role = Role.PATIENT;
