@@ -5,7 +5,6 @@ import org.example.project.exception.ConflictException;
 import org.example.project.exception.UserNotFoundException;
 import org.example.project.model.dto.request.ChangePasswordRequest;
 import org.example.project.model.dto.request.RegisterRequest;
-import org.example.project.model.dto.request.UserRequest;
 import org.example.project.model.dto.request.UserUpdateRequest;
 import org.example.project.model.dto.response.UserResponse;
 import org.example.project.model.entity.User;
