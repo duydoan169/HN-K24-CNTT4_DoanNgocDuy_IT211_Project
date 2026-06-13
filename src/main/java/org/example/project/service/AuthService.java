@@ -5,11 +5,15 @@ import lombok.RequiredArgsConstructor;
 import org.example.project.exception.ConflictException;
 import org.example.project.exception.UserNotFoundException;
 import org.example.project.model.dto.request.AuthRequest;
+import org.example.project.model.dto.request.ForgotPasswordRequest;
 import org.example.project.model.dto.request.RefreshRequest;
+import org.example.project.model.dto.request.ResetPasswordRequest;
 import org.example.project.model.dto.response.AuthResponse;
+import org.example.project.model.entity.PasswordResetToken;
 import org.example.project.model.entity.RefreshToken;
 import org.example.project.model.entity.TokenBlacklist;
 import org.example.project.model.entity.User;
+import org.example.project.repository.PasswordResetTokenRepository;
 import org.example.project.repository.RefreshTokenRepository;
 import org.example.project.repository.TokenBlacklistRepository;
 import org.example.project.repository.UserRepository;
@@ -18,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,6 +36,8 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final TokenBlacklistRepository tokenBlacklistRepository;
     private final AuthenticationManager authenticationManager;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
     @Value("${jwt.refresh-token-expiration}")
@@ -94,5 +101,40 @@ public class AuthService {
                 .build();
 
         tokenBlacklistRepository.save(blacklisted);
+    }
+
+    @Transactional
+    public String forgotPassword(ForgotPasswordRequest request) {
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new UserNotFoundException(request.getUsername()));
+
+        passwordResetTokenRepository.deleteByUser(user);
+
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(UUID.randomUUID().toString())
+                .user(user)
+                .expiryDate(LocalDateTime.now().plusMinutes(15))
+                .build();
+
+        passwordResetTokenRepository.save(resetToken);
+
+        return resetToken.getToken();
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(request.getToken())
+                .orElseThrow(() -> new ConflictException("Token không hợp lệ"));
+
+        if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            passwordResetTokenRepository.delete(resetToken);
+            throw new ConflictException("Token đã hết hạn, vui lòng thử lại");
+        }
+
+        User user = resetToken.getUser();
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        passwordResetTokenRepository.delete(resetToken);
     }
 }

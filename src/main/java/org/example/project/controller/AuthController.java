@@ -2,10 +2,7 @@ package org.example.project.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.project.model.dto.request.AuthRequest;
-import org.example.project.model.dto.request.ChangePasswordRequest;
-import org.example.project.model.dto.request.RefreshRequest;
-import org.example.project.model.dto.request.RegisterRequest;
+import org.example.project.model.dto.request.*;
 import org.example.project.model.dto.response.ApiResponse;
 import org.example.project.model.dto.response.AuthResponse;
 import org.example.project.model.dto.response.UserResponse;
@@ -56,5 +53,17 @@ public class AuthController {
             @RequestBody @Valid ChangePasswordRequest request) {
         userService.changePassword(user.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("Đổi mật khẩu thành công"));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
+        String token = authService.forgotPassword(request);
+        return ResponseEntity.ok(ApiResponse.success("Token đặt lại mật khẩu", token));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.success("Đặt lại mật khẩu thành công"));
     }
 }
