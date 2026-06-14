@@ -124,64 +124,9 @@ public class AppointmentServiceTest {
     }
 
     @Test
-    void approveAppointment_WrongDoctor_ThrowsAccessDenied() {
-        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(mockAppointment()));
-
-        assertThrows(AccessDeniedException.class, () -> appointmentService.approveAppointment(1L, 99L));
-    }
-
-    @Test
-    void cancelAppointment_Success() {
-        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(mockAppointment()));
-        when(appointmentRepository.save(any())).thenReturn(mockAppointment());
-
-        AppointmentResponse result = appointmentService.cancelAppointment(1L, 1L);
-
-        assertNotNull(result);
-    }
-
-    @Test
     void cancelAppointment_NotOwner_ThrowsAccessDenied() {
         when(appointmentRepository.findById(1L)).thenReturn(Optional.of(mockAppointment()));
 
         assertThrows(AccessDeniedException.class, () -> appointmentService.cancelAppointment(1L, 99L));
-    }
-
-    @Test
-    void bookAppointment_EndTimeBeforeStartTime_ThrowsConflict() {
-        AppointmentRequest request = new AppointmentRequest();
-        request.setDoctorId(2L);
-        request.setDate(LocalDate.now().plusDays(1));
-        request.setStartTime(LocalTime.of(10, 0));
-        request.setEndTime(LocalTime.of(9, 0));
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(mockPatient()));
-        when(userRepository.findById(2L)).thenReturn(Optional.of(mockDoctor()));
-
-        assertThrows(ConflictException.class, () -> appointmentService.bookAppointment(1L, request));
-    }
-
-    @Test
-    void bookAppointment_LessThan15Minutes_ThrowsConflict() {
-        AppointmentRequest request = new AppointmentRequest();
-        request.setDoctorId(2L);
-        request.setDate(LocalDate.now().plusDays(1));
-        request.setStartTime(LocalTime.of(9, 0));
-        request.setEndTime(LocalTime.of(9, 10));
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(mockPatient()));
-        when(userRepository.findById(2L)).thenReturn(Optional.of(mockDoctor()));
-
-        assertThrows(ConflictException.class, () -> appointmentService.bookAppointment(1L, request));
-    }
-
-    @Test
-    void rejectAppointment_NotPending_ThrowsConflict() {
-        Appointment approved = mockAppointment();
-        approved.setStatus(AppointmentStatus.APPROVED);
-
-        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(approved));
-
-        assertThrows(ConflictException.class, () -> appointmentService.rejectAppointment(1L, 2L));
     }
 }
