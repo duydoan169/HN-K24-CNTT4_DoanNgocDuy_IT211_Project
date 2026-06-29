@@ -72,7 +72,10 @@ public class AppointmentService {
                 .symptomDescription(request.getSymptomDescription())
                 .build();
 
-        return toResponse(appointmentRepository.save(appointment));
+        AppointmentResponse appointmentResponse = toResponse(appointmentRepository.save(appointment));
+        appointmentResponse.setTime(appointment.getStartTime() + " - " + appointment.getEndTime());
+//        appointmentResponse.setTime(appointment.getStartTime().toString().concat(" - ").concat(appointment.getEndTime().toString()));
+        return appointmentResponse;
     }
 
     public Page<AppointmentResponse> getAllAppointmentsByPatient(Long patientId, int page, int size) {

@@ -22,4 +22,5 @@ public class AppointmentResponse {
     private AppointmentStatus status;
     private String symptomDescription;
     private LocalDateTime createdAt;
+    private String time;
 }
